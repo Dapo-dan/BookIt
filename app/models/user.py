@@ -1,4 +1,4 @@
-from sqlalchemy import String, Enum, func, DateTime
+from sqlalchemy import String, func, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base
 from datetime import datetime
@@ -14,5 +14,5 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(120))
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     password_hash: Mapped[str] = mapped_column(String(255))
-    role: Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.user)
+    role: Mapped[str] = mapped_column(String(20), default="user")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

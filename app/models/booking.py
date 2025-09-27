@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, String, Enum, func, text, DateTime
+from sqlalchemy import ForeignKey, String, func, text, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base
 from datetime import datetime
@@ -17,7 +17,7 @@ class Booking(Base):
     service_id: Mapped[int] = mapped_column(ForeignKey("services.id", ondelete="CASCADE"))
     start_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     end_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    status: Mapped[BookingStatus] = mapped_column(Enum(BookingStatus), default=BookingStatus.pending)
+    status: Mapped[str] = mapped_column(String(20), default="pending")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     # NOTE: range/exclusion constraint created in Alembic migration using tstzrange
