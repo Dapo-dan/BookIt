@@ -1,0 +1,58 @@
+services:
+  # PostgreSQL Database
+  - type: pserv
+    name: bookit-database
+    env: docker
+    plan: starter
+    dockerCommand: docker run -d --name postgres -e POSTGRES_DB=bookit_db -e POSTGRES_USER=bookit_user -e POSTGRES_PASSWORD=bookit_password -p 5432:5432 postgres:15
+
+  # Redis Cache
+  - type: redis
+    name: bookit-redis
+    plan: starter
+
+  # FastAPI Web Service
+  - type: web
+    name: bookit-api
+    env: python
+    plan: starter
+    buildCommand: |
+      pip install poetry
+      poetry config virtualenvs.create false
+      poetry install --no-dev
+      alembic upgrade head
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_ALG
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 15
+      - key: REFRESH_TOKEN_EXPIRE_MINUTES
+        value: 43200
+      - key: BCRYPT_ROUNDS
+        value: 12
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: bookit-database
+          property: connectionString
+      - key: SYNC_DATABASE_URL
+        fromService:
+          type: pserv
+          name: bookit-database
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: bookit-redis
+          property: connectionString
+    healthCheckPath: /health
+    autoDeploy: true
+    region: oregon
+    branch: main
