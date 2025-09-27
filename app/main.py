@@ -3,9 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.logging import setup_logging
 from app.routers import auth, users, services, bookings, reviews
+import logging
 
 # Setup logging
 setup_logging()
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="BookIt API",
@@ -37,4 +39,12 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy"}
+    try:
+        # Test database connection
+        from app.db.session import engine
+        async with engine.begin() as conn:
+            await conn.execute("SELECT 1")
+        return {"status": "healthy", "database": "connected"}
+    except Exception as e:
+        logger.error(f"Health check failed: {e}")
+        return {"status": "unhealthy", "database": "disconnected", "error": str(e)}

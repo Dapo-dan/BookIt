@@ -14,8 +14,15 @@ class Settings(BaseModel):
     refresh_minutes: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES", 43200))
     bcrypt_rounds: int = int(os.getenv("BCRYPT_ROUNDS", 12))
 
-    db_url_async: str = os.getenv("DATABASE_URL")
-    db_url_sync: str = os.getenv("SYNC_DATABASE_URL")
+    db_url_async: str = os.getenv("DATABASE_URL", "")
+    db_url_sync: str = os.getenv("SYNC_DATABASE_URL", "")
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if not self.db_url_async:
+            raise ValueError("DATABASE_URL environment variable is required")
+        if not self.db_url_sync:
+            self.db_url_sync = self.db_url_async.replace("postgresql+asyncpg://", "postgresql://")
 
 settings = Settings()
 

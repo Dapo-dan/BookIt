@@ -16,6 +16,7 @@ services:
     name: bookit-api
     env: python
     plan: starter
+    pythonVersion: 3.12.5
     buildCommand: |
       pip install poetry
       poetry config virtualenvs.create false

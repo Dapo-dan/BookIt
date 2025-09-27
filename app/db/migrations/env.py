@@ -36,9 +36,11 @@ target_metadata = Base.metadata
 def get_url():
     """Get database URL from environment variable"""
     url = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./bookit.db")
-    # Convert async SQLite URL to sync for migrations
+    # Convert async URLs to sync for migrations
     if url.startswith("sqlite+aiosqlite://"):
         url = url.replace("sqlite+aiosqlite://", "sqlite://")
+    elif url.startswith("postgresql+asyncpg://"):
+        url = url.replace("postgresql+asyncpg://", "postgresql://")
     return url
 
 def run_migrations_offline() -> None:
